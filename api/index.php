@@ -1,11 +1,6 @@
 <?php
 require_once 'functions.php';
 
-file_put_contents(__DIR__ . '/debug.log', 
-    date('Y-m-d H:i:s') . ' ' . $_SERVER['REQUEST_METHOD'] . ' ' . $requestUri . "\n", 
-    FILE_APPEND
-);
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -16,6 +11,11 @@ header('Content-Type: application/json');
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestUri = rtrim(str_replace('/api', '', $requestUri), '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
+
+file_put_contents(__DIR__ . '/debug.log', 
+    date('Y-m-d H:i:s') . ' ' . $_SERVER['REQUEST_METHOD'] . ' ' . $requestUri . "\n", 
+    FILE_APPEND
+);
 
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
