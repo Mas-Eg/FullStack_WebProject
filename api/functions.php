@@ -27,7 +27,7 @@ function saveUser($data) {
     $pdo = getDB();
     list($login, $password) = generateLoginPassword();
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (login, password, name, email, phone, bio) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO user_project (login, password, name, email, phone, bio) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$login, $hashedPassword, $data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '']);
     $userId = $pdo->lastInsertId();
@@ -42,7 +42,7 @@ function saveUser($data) {
 function updateUser($userId, $data) {
     $pdo = getDB();
     // нельзя менять логин и пароль
-    $sql = "UPDATE users SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
+    $sql = "UPDATE user_project SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '', $userId]);
     return ['status' => 'success', 'message' => 'Данные обновлены'];
@@ -50,7 +50,7 @@ function updateUser($userId, $data) {
 
 function authenticateUser($login, $password) {
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ?");
+    $stmt = $pdo->prepare("SELECT * FROM user_project WHERE login = ?");
     $stmt->execute([$login]);
     $user = $stmt->fetch();
     if ($user && password_verify($password, $user['password'])) {
