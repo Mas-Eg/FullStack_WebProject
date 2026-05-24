@@ -223,7 +223,7 @@ if (contactForm) {
         showFieldErrors(null); // очищаем ошибки
 
         try {
-            const response = await fetch('${API_BASE}/', {
+            const response = await fetch(API_BASE+'/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ async function checkAuth() {
 
 async function loadUserProfile(userId) {
     try {
-        const resp = await fetch(`${API_BASE}/${userId}`, {
+        const resp = await fetch(API_BASE+'/{userId}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
@@ -317,7 +317,7 @@ if (loginForm) {
         const credentials = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('${API_BASE}/login', {
+            const response = await fetch(API_BASE+'/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -376,7 +376,7 @@ if (loginForm) {
         showFieldErrors(null);
 
         try {
-            const response = await fetch(`${API_BASE}/${userId}`, {
+            const response = await fetch(API_BASE+'/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
