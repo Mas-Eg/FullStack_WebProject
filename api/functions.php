@@ -3,8 +3,8 @@ session_start();
 require_once 'db.php';
 
 function generateLoginPassword() {
-    $login = 'u' . bin2hex(random_bytes(3));   // 7 символов
-    $password = bin2hex(random_bytes(4));      // 8 символов
+    $login = 'u' . bin2hex(random_bytes(3));   
+    $password = bin2hex(random_bytes(4));      
     return [$login, $password];
 }
 
@@ -33,7 +33,7 @@ function saveUser($data) {
     return [
         'user_id' => $userId,
         'login' => $login,
-        'password' => $password,   // передаём открытый пароль только один раз
+        'password' => $password,   
         'profile_url' => "/login.html?id=$userId"
     ];
 }
