@@ -8,10 +8,6 @@ $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestUri = rtrim(str_replace('/api', '', $requestUri), '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
-case ($method === 'GET' && $requestUri === '/'):
-    echo json_encode(['status' => 'ok', 'api' => 'working']);
-    break;
-
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
 $inputData = [];
