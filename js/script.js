@@ -222,7 +222,7 @@ if (contactForm) {
         showFieldErrors(null); // очищаем ошибки
 
         try {
-            const response = await fetch('/api/index.php', {
+            const response = await fetch('./api/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
