@@ -10,28 +10,32 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
+$inputData = [];
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
-// Разбор JSON или XML тела
-$inputData = [];
 if (strpos($contentType, 'application/json') !== false) {
     $inputData = json_decode($rawBody, true);
 } elseif (strpos($contentType, 'application/xml') !== false) {
+    if (!function_exists('simplexml_load_string')) {
+        http_response_code(501);
+        echo json_encode(['status' => 'error', 'message' => 'XML не поддерживается сервером']);
+        exit;
+    }
     $xml = simplexml_load_string($rawBody);
     if ($xml) {
         $inputData = json_decode(json_encode($xml), true);
     }
 } else {
-    // если тип не указан, пробуем оба
     $inputData = json_decode($rawBody, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        $xml = simplexml_load_string($rawBody);
-        if ($xml) {
-            $inputData = json_decode(json_encode($xml), true);
+        if (function_exists('simplexml_load_string')) {
+            $xml = @simplexml_load_string($rawBody);
+            if ($xml) {
+                $inputData = json_decode(json_encode($xml), true);
+            }
         }
     }
 }
-
 // Маршрутизация
 try {
     switch (true) {
