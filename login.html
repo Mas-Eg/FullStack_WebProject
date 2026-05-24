@@ -9,20 +9,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* страница без видео-фона, чтобы навигация была поверх */
+        body { background-color: #f8f9fa; }
+        .nav { background-color: rgba(0,0,0,0.85); }
+    </style>
 </head>
 <body>
+    <!-- Шапка -->
     <header>
-    <nav class="nav">
-        <a href="index.html" class="logo">СТРОЙ<span>МАРКЕТЫ</span></a>
-        <ul class="nav-links">
-            <li><a href="index.html">Главная</a></li>
-            <li><a href="index.html#competencies">Компетенции</a></li>
-            <li><a href="index.html#slider">Проекты</a></li>
-            <li><a href="index.html#form">Контакты</a></li>
-            <li><a href="login.html">Профиль</a></li>
-        </ul>
-    </nav>
-</header>
+        <nav class="nav">
+            <a href="index.html" class="logo">СТРОЙ<span>МАРКЕТЫ</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="index.html#competencies">Компетенции</a></li>
+                <li><a href="index.html#slider">Проекты</a></li>
+                <li><a href="index.html#form">Контакты</a></li>
+                <li><a href="login.html">Профиль</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Основной контент -->
     <div class="container" style="padding-top:60px; padding-bottom:60px;">
         <div class="form-container" style="max-width:600px; margin:0 auto;">
             <h2 class="form-title" id="pageTitle">Вход в профиль</h2>
@@ -66,9 +74,41 @@
                 </div>
                 <button type="submit" class="btn" style="width:100%;" id="updateBtn">Сохранить изменения</button>
             </form>
-            <p style="text-align:center; margin-top:20px;"><a href="index.html">← На главную</a></p>
+            <p style="text-align:center; margin-top:20px;"><a href="index.html" style="color: #ff9900;">← На главную</a></p>
         </div>
     </div>
+
+    <!-- Футер (тот же, что и на других страницах) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>СТРОЙМАРКЕТЫ</h3>
+                    <p>Всё для строительства и ремонта. Профессиональные материалы, инструменты и оборудование от ведущих производителей.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Строителей, 15</li>
+                        <li><i class="fas fa-phone"></i> +7 (495) 123-45-67</li>
+                        <li><i class="fas fa-envelope"></i> info@stroymarkety.ru</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Главная</a></li>
+                        <li><a href="index.html#competencies">Компетенции</a></li>
+                        <li><a href="index.html#slider">Проекты</a></li>
+                        <li><a href="index.html#form">Контакты</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 СТРОЙМАРКЕТЫ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/script.js"></script>
