@@ -42,6 +42,9 @@ function saveUser($data) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$login, $hashedPassword, $data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '']);
     $userId = $pdo->lastInsertId();
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+    $projectDir = rtrim($scriptDir, '/') == '/api' ? dirname($scriptDir) : $scriptDir;
+    $profile_url = $projectDir . '/login.html?id=' . $userId;
     return [
         'user_id' => $userId,
         'login' => $login,
