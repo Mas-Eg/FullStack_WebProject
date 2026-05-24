@@ -1,7 +1,6 @@
 <?php
 require_once 'api/functions.php';
 
-// Если AJAX – не должно приходить, но на всякий случай
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
     header('Content-Type: application/json');
     require 'api/index.php';
