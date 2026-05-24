@@ -12,11 +12,6 @@ $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestUri = rtrim(str_replace('/api', '', $requestUri), '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
-file_put_contents(__DIR__ . '/debug.log', 
-    date('Y-m-d H:i:s') . ' ' . $_SERVER['REQUEST_METHOD'] . ' ' . $requestUri . "\n", 
-    FILE_APPEND
-);
-
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
 $inputData = [];
