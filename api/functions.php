@@ -1,0 +1,74 @@
+<?php
+session_start();
+require_once 'db.php';
+
+function generateLoginPassword() {
+    $login = 'u' . bin2hex(random_bytes(3));   // 7 символов
+    $password = bin2hex(random_bytes(4));      // 8 символов
+    return [$login, $password];
+}
+
+function validateFormData($data) {
+    $errors = [];
+    if (empty($data['name']) || mb_strlen($data['name']) < 2) {
+        $errors['name'] = 'Имя должно содержать минимум 2 символа';
+    }
+    if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Некорректный email';
+    }
+    if (!empty($data['phone']) && !preg_match('/^\+?\d{7,15}$/', $data['phone'])) {
+        $errors['phone'] = 'Некорректный номер телефона';
+    }
+    // можно добавить другие поля по необходимости
+    return $errors;
+}
+
+function saveUser($data) {
+    $pdo = getDB();
+    list($login, $password) = generateLoginPassword();
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $sql = "INSERT INTO users (login, password, name, email, phone, bio) VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$login, $hashedPassword, $data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '']);
+    $userId = $pdo->lastInsertId();
+    return [
+        'user_id' => $userId,
+        'login' => $login,
+        'password' => $password,   // передаём открытый пароль только один раз
+        'profile_url' => "/login.html?id=$userId"
+    ];
+}
+
+function updateUser($userId, $data) {
+    $pdo = getDB();
+    // нельзя менять логин и пароль
+    $sql = "UPDATE users SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '', $userId]);
+    return ['status' => 'success', 'message' => 'Данные обновлены'];
+}
+
+function authenticateUser($login, $password) {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ?");
+    $stmt->execute([$login]);
+    $user = $stmt->fetch();
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_login'] = $user['login'];
+        return $user;
+    }
+    return false;
+}
+
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+function requireAuth() {
+    if (!isLoggedIn()) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Необходима авторизация']);
+        exit;
+    }
+}
