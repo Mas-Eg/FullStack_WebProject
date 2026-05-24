@@ -10,15 +10,27 @@ function generateLoginPassword() {
 
 function validateFormData($data) {
     $errors = [];
-    if (empty($data['name']) || mb_strlen($data['name']) < 2) {
+    
+    // Проверка имени (минимум 2 символа Unicode)
+    if (empty($data['name']) || !preg_match('/^.{2,}$/u', $data['name'])) {
         $errors['name'] = 'Имя должно содержать минимум 2 символа';
     }
+    
+    // Проверка email
     if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Некорректный email';
     }
+    
+    // Проверка телефона (если указан)
     if (!empty($data['phone']) && !preg_match('/^\+?\d{7,15}$/', $data['phone'])) {
         $errors['phone'] = 'Некорректный номер телефона';
     }
+    
+    // Проверка сообщения (не более 500 символов Unicode)
+    if (!empty($data['bio']) && !preg_match('/^.{0,500}$/u', $data['bio'])) {
+        $errors['bio'] = 'Сообщение не должно превышать 500 символов';
+    }
+    
     return $errors;
 }
 
