@@ -179,6 +179,9 @@ function showMessage(element, text, isError = false) {
 }
 
 // ================== Регистрация (index.html) ==================
+const API_BASE = window.location.pathname.includes('/FullStack_WebProject/') 
+    ? '/FullStack_WebProject/api' 
+    : '/api';
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
@@ -222,7 +225,7 @@ if (contactForm) {
         showFieldErrors(null); // очищаем ошибки
 
         try {
-            const response = await fetch('Web_Labs/FullStack_WebProject/api/', {
+            const response = await fetch('${API_BASE}/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -269,7 +272,7 @@ const pageTitle = document.getElementById('pageTitle');
 // Проверка авторизации при загрузке login.html
 async function checkAuth() {
     try {
-        const resp = await fetch('/api/check-auth', {
+        const resp = await fetch('${API_BASE}/check-auth', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
@@ -284,7 +287,7 @@ async function checkAuth() {
 
 async function loadUserProfile(userId) {
     try {
-        const resp = await fetch(`/api/${userId}`, {
+        const resp = await fetch(`${API_BASE}/${userId}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
@@ -316,7 +319,7 @@ if (loginForm) {
         const credentials = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('${API_BASE}/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -375,7 +378,7 @@ if (loginForm) {
         showFieldErrors(null);
 
         try {
-            const response = await fetch(`/api/${userId}`, {
+            const response = await fetch(`${API_BASE}/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
