@@ -1,34 +1,26 @@
 <?php
 require_once 'functions.php';
 
+// Включаем отображение ошибок (для отладки, потом можно убрать)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
-require_once 'functions.php';
+// --- Определяем $method в самом начале ---
+$method = $_SERVER['REQUEST_METHOD'];
 
-header('Content-Type: application/json');
-
-// Получаем базовый путь до папки api
-$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');  
-
-// Берем URI из запроса
+// --- Вычисляем маршрут ---
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');   // например: /FullStack_WebProject/api
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Убираем базовый путь из начала URI
 if (strpos($requestUri, $basePath) === 0) {
     $requestUri = substr($requestUri, strlen($basePath));
 }
-
-// Убираем завершающий слеш и приводим к "/" если пусто
 $requestUri = rtrim($requestUri, '/') ?: '/';
 
-file_put_contents(__DIR__ . '/debug.log', "$method $requestUri\n", FILE_APPEND);
-
-$method = $_SERVER['REQUEST_METHOD'];
-// Получаем тело запроса
+// --- Получаем тело запроса ---
 $rawBody = file_get_contents('php://input');
 $inputData = [];
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -36,6 +28,7 @@ $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 if (strpos($contentType, 'application/json') !== false) {
     $inputData = json_decode($rawBody, true);
 } elseif (strpos($contentType, 'application/xml') !== false) {
+    // Проверяем наличие SimpleXML
     if (!function_exists('simplexml_load_string')) {
         http_response_code(501);
         echo json_encode(['status' => 'error', 'message' => 'XML не поддерживается сервером']);
@@ -56,11 +49,15 @@ if (strpos($contentType, 'application/json') !== false) {
         }
     }
 }
-// Маршрутизация
+
+// --- Отладка (можно закомментировать после проверки) ---
+// file_put_contents(__DIR__ . '/debug.log', "$method $requestUri\n", FILE_APPEND);
+
+// --- Маршрутизация ---
 try {
     switch (true) {
+        // Регистрация нового пользователя
         case ($method === 'POST' && $requestUri === '/'):
-            // Создание нового пользователя
             $errors = validateFormData($inputData);
             if (!empty($errors)) {
                 http_response_code(422);
@@ -72,9 +69,10 @@ try {
             echo json_encode(['status' => 'success'] + $result);
             break;
 
+        // Обновление данных авторизованного пользователя
         case ($method === 'PUT' && preg_match('#^/(\d+)$#', $requestUri, $m)):
             $userId = (int)$m[1];
-            requireAuth();            // только авторизованные
+            requireAuth();
             if ($_SESSION['user_id'] != $userId) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Доступ запрещён']);
@@ -90,16 +88,55 @@ try {
             echo json_encode($result);
             break;
 
+        // Авторизация
         case ($method === 'POST' && $requestUri === '/login'):
-            // авторизация
             $login = $inputData['login'] ?? '';
             $password = $inputData['password'] ?? '';
             $user = authenticateUser($login, $password);
             if ($user) {
-                echo json_encode(['status' => 'success', 'user_id' => $user['id'], 'login' => $user['login']]);
+                echo json_encode([
+                    'status' => 'success',
+                    'user_id' => $user['id'],
+                    'login' => $user['login'],
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'phone' => $user['phone'],
+                    'bio' => $user['bio']
+                ]);
             } else {
                 http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
+            }
+            break;
+
+        // Получение данных пользователя (для формы редактирования)
+        case ($method === 'GET' && preg_match('#^/(\d+)$#', $requestUri, $m)):
+            $userId = (int)$m[1];
+            requireAuth();
+            if ($_SESSION['user_id'] != $userId) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Доступ запрещён']);
+                break;
+            }
+            $pdo = getDB();
+            $stmt = $pdo->prepare("SELECT id, login, name, email, phone, bio FROM user_project WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
+            if ($user) {
+                echo json_encode(['status' => 'success', 'user' => $user]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
+            }
+            break;
+
+        // Проверка авторизации
+        case ($method === 'GET' && $requestUri === '/check-auth'):
+            if (isLoggedIn()) {
+                echo json_encode(['status' => 'success', 'user_id' => $_SESSION['user_id'], 'login' => $_SESSION['user_login']]);
+            } else {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Не авторизован']);
             }
             break;
 
