@@ -49,7 +49,7 @@ function saveUser($data) {
         'user_id' => $userId,
         'login' => $login,
         'password' => $password,   
-        'profile_url' => "/login.html?id=$userId"
+        'profile_url' => $profile_url
     ];
 }
 
