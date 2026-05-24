@@ -40,7 +40,6 @@ function saveUser($data) {
 
 function updateUser($userId, $data) {
     $pdo = getDB();
-    // нельзя менять логин и пароль
     $sql = "UPDATE user_project SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '', $userId]);
