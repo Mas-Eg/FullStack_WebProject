@@ -19,7 +19,6 @@ function validateFormData($data) {
     if (!empty($data['phone']) && !preg_match('/^\+?\d{7,15}$/', $data['phone'])) {
         $errors['phone'] = 'Некорректный номер телефона';
     }
-    // можно добавить другие поля по необходимости
     return $errors;
 }
 
