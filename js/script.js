@@ -111,7 +111,7 @@ $(document).ready(function() {
         });
 
         function startInterval() {
-            slideInterval = setInterval(nextSlide, 12000);
+            slideInterval = setInterval(nextSlide, 36000);
         }
 
         function resetInterval() {
