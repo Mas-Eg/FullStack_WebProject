@@ -12,7 +12,7 @@ require_once 'functions.php';
 header('Content-Type: application/json');
 
 // Получаем базовый путь до папки api
-$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');   // например: /FullStack_WebProject/api
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');  
 
 // Берем URI из запроса
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -24,6 +24,8 @@ if (strpos($requestUri, $basePath) === 0) {
 
 // Убираем завершающий слеш и приводим к "/" если пусто
 $requestUri = rtrim($requestUri, '/') ?: '/';
+
+file_put_contents(__DIR__ . '/debug.log', "$method $requestUri\n", FILE_APPEND);
 
 $method = $_SERVER['REQUEST_METHOD'];
 // Получаем тело запроса
