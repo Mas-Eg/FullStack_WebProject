@@ -1,0 +1,85 @@
+<?php
+require_once 'functions.php';
+
+header('Content-Type: application/json');
+
+// Определяем URI и метод
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestUri = rtrim(str_replace('/api', '', $requestUri), '/') ?: '/';
+$method = $_SERVER['REQUEST_METHOD'];
+
+$rawBody = file_get_contents('php://input');
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+// Разбор JSON или XML тела
+$inputData = [];
+if (strpos($contentType, 'application/json') !== false) {
+    $inputData = json_decode($rawBody, true);
+} elseif (strpos($contentType, 'application/xml') !== false) {
+    $xml = simplexml_load_string($rawBody);
+    if ($xml) {
+        $inputData = json_decode(json_encode($xml), true);
+    }
+} else {
+    $inputData = json_decode($rawBody, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $xml = simplexml_load_string($rawBody);
+        if ($xml) {
+            $inputData = json_decode(json_encode($xml), true);
+        }
+    }
+}
+
+// Маршрутизация
+try {
+    switch (true) {
+        case ($method === 'POST' && $requestUri === '/'):
+            $errors = validateFormData($inputData);
+            if (!empty($errors)) {
+                http_response_code(422);
+                echo json_encode(['status' => 'error', 'errors' => $errors]);
+                break;
+            }
+            $result = saveUser($inputData);
+            http_response_code(201);
+            echo json_encode(['status' => 'success'] + $result);
+            break;
+
+        case ($method === 'PUT' && preg_match('#^/(\d+)$#', $requestUri, $m)):
+            $userId = (int)$m[1];
+            requireAuth();           
+            if ($_SESSION['user_id'] != $userId) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Доступ запрещён']);
+                break;
+            }
+            $errors = validateFormData($inputData);
+            if (!empty($errors)) {
+                http_response_code(422);
+                echo json_encode(['status' => 'error', 'errors' => $errors]);
+                break;
+            }
+            $result = updateUser($userId, $inputData);
+            echo json_encode($result);
+            break;
+
+        case ($method === 'POST' && $requestUri === '/login'):
+            $login = $inputData['login'] ?? '';
+            $password = $inputData['password'] ?? '';
+            $user = authenticateUser($login, $password);
+            if ($user) {
+                echo json_encode(['status' => 'success', 'user_id' => $user['id'], 'login' => $user['login']]);
+            } else {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
+            }
+            break;
+
+        default:
+            http_response_code(404);
+            echo json_encode(['status' => 'error', 'message' => 'Маршрут не найден']);
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Внутренняя ошибка сервера']);
+}
