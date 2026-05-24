@@ -7,11 +7,25 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
-// Определяем URI и метод
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$requestUri = rtrim(str_replace('/api', '', $requestUri), '/') ?: '/';
-$method = $_SERVER['REQUEST_METHOD'];
+require_once 'functions.php';
 
+header('Content-Type: application/json');
+
+// Получаем базовый путь до папки api
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');   // например: /FullStack_WebProject/api
+
+// Берем URI из запроса
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Убираем базовый путь из начала URI
+if (strpos($requestUri, $basePath) === 0) {
+    $requestUri = substr($requestUri, strlen($basePath));
+}
+
+// Убираем завершающий слеш и приводим к "/" если пусто
+$requestUri = rtrim($requestUri, '/') ?: '/';
+
+$method = $_SERVER['REQUEST_METHOD'];
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
 $inputData = [];
