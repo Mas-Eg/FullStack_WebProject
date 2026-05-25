@@ -403,3 +403,205 @@ if (loginForm) {
     checkAuth();
 }
 
+// ========== Админ-панель (упрощённая версия со статическим HTML) ==========
+// Автоопределение базового пути API
+if (typeof API_BASE === 'undefined') {
+    var API_BASE = '';
+}
+
+// Вспомогательные функции
+function adminShowMessage(containerId, text, isError = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = `<div class="form-message ${isError ? 'error' : 'success'}" style="display:block;">${text}</div>`;
+    setTimeout(() => {
+        if (container.firstChild) container.firstChild.style.display = 'none';
+    }, 4000);
+}
+
+async function adminApiRequest(url, options = {}) {
+    const response = await fetch(API_BASE + url, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', ...options.headers }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Ошибка запроса');
+    return data;
+}
+
+async function adminCheckAuth() {
+    try {
+        await adminApiRequest('/api/admin/check');
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function adminLogin(login, password) {
+    return await adminApiRequest('/api/admin/login', {
+        method: 'POST',
+        body: JSON.stringify({ login, password })
+    });
+}
+
+async function adminLogout() {
+    await adminApiRequest('/api/admin/logout', { method: 'POST' });
+}
+
+async function adminLoadUsers() {
+    const data = await adminApiRequest('/api/admin/users');
+    return data.users;
+}
+
+async function adminDeleteUser(userId) {
+    return await adminApiRequest(`/api/admin/users/${userId}`, { method: 'DELETE' });
+}
+
+async function adminUpdateUser(userId, userData) {
+    return await adminApiRequest(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(userData)
+    });
+}
+
+// Заполнение таблицы пользователей
+async function renderUserTable() {
+    const tbody = document.getElementById('userTableBody');
+    if (!tbody) return;
+    try {
+        const users = await adminLoadUsers();
+        tbody.innerHTML = '';
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Пользователей не найдено</td></tr>';
+            return;
+        }
+        users.forEach(user => {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = user.id;
+            row.insertCell(1).textContent = user.login;
+            row.insertCell(2).textContent = user.name;
+            row.insertCell(3).textContent = user.email;
+            row.insertCell(4).textContent = user.phone || '—';
+            const actionsCell = row.insertCell(5);
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Редактировать';
+            editBtn.className = 'btn btn-sm btn-edit';
+            editBtn.onclick = () => openEditModal(user);
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Удалить';
+            delBtn.className = 'btn btn-sm btn-delete';
+            delBtn.onclick = async () => {
+                if (confirm(`Удалить пользователя ${user.login}?`)) {
+                    try {
+                        await adminDeleteUser(user.id);
+                        adminShowMessage('adminMessage', 'Пользователь удалён', false);
+                        renderUserTable();
+                    } catch (err) {
+                        adminShowMessage('adminMessage', err.message, true);
+                    }
+                }
+            };
+            actionsCell.appendChild(editBtn);
+            actionsCell.appendChild(delBtn);
+        });
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Ошибка загрузки: ${err.message}</td></tr>`;
+    }
+}
+
+// Модальное окно
+function openEditModal(user) {
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editName').value = user.name;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editPhone').value = user.phone || '';
+    document.getElementById('editBio').value = user.bio || '';
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// Навешивание событий после загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Элементы блоков
+    const loginBlock = document.getElementById('adminLoginBlock');
+    const panelBlock = document.getElementById('adminPanelBlock');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginForm = document.getElementById('adminLoginForm');
+    const modal = document.getElementById('editModal');
+    const closeModal = modal?.querySelector('.close-modal');
+    const editForm = document.getElementById('editForm');
+
+    // Закрытие модального окна
+    if (closeModal) closeModal.onclick = closeEditModal;
+    window.onclick = (e) => { if (e.target === modal) closeEditModal(); };
+
+    // Обработчик выхода
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await adminLogout();
+            loginBlock.style.display = 'block';
+            panelBlock.style.display = 'none';
+            adminShowMessage('loginMessage', 'Вы вышли из системы', false);
+        });
+    }
+
+    // Обработчик входа
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const login = document.getElementById('adminLogin').value;
+            const password = document.getElementById('adminPassword').value;
+            try {
+                await adminLogin(login, password);
+                adminShowMessage('loginMessage', 'Вход выполнен', false);
+                // Переключаем блоки
+                loginBlock.style.display = 'none';
+                panelBlock.style.display = 'block';
+                await renderUserTable();
+            } catch (err) {
+                adminShowMessage('loginMessage', err.message, true);
+            }
+        });
+    }
+
+    // Обработчик редактирования
+    if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const data = {
+                name: document.getElementById('editName').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                bio: document.getElementById('editBio').value
+            };
+            try {
+                await adminUpdateUser(userId, data);
+                adminShowMessage('modalMessage', 'Данные обновлены', false);
+                setTimeout(() => {
+                    closeEditModal();
+                    renderUserTable();
+                }, 1000);
+            } catch (err) {
+                adminShowMessage('modalMessage', err.message, true);
+            }
+        });
+    }
+
+    // Проверка авторизации при загрузке
+    (async () => {
+        const isAdmin = await adminCheckAuth();
+        if (isAdmin) {
+            loginBlock.style.display = 'none';
+            panelBlock.style.display = 'block';
+            await renderUserTable();
+        } else {
+            loginBlock.style.display = 'block';
+            panelBlock.style.display = 'none';
+        }
+    })();
+});
