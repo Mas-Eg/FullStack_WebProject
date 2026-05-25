@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель | СТРОЙМАРКЕТЫ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a href="index.html" class="logo">СТРОЙ<span>МАРКЕТЫ</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="index.html#competencies">Компетенции</a></li>
+                <li><a href="index.html#slider">Проекты</a></li>
+                <li><a href="index.html#form">Контакты</a></li>
+                <li><a href="login.html">Профиль</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container" style="padding: 60px 15px;">
+        <!-- Блок входа (показывается по умолчанию) -->
+        <div id="adminLoginBlock" class="form-container" style="max-width:450px; margin:0 auto;">
+            <h2 class="form-title">Вход в админ-панель</h2>
+            <div id="loginMessage"></div>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="adminLogin" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="adminPassword" class="form-control" required>
+                </div>
+                <button type="submit" class="btn" style="width:100%;">Войти</button>
+            </form>
+            <p style="text-align:center; margin-top:20px;"><a href="index.html" style="color:#ff9900;">← На главную</a></p>
+        </div>
+
+        <!-- Блок панели управления (изначально скрыт) -->
+        <div id="adminPanelBlock" class="form-container" style="max-width:100%; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 class="form-title" style="margin-bottom:0;">Админ-панель</h2>
+                <button id="logoutBtn" class="btn btn-sm" style="background:#6c757d;">Выйти</button>
+            </div>
+            <div id="adminMessage"></div>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>ID</th><th>Логин</th><th>Имя</th><th>Email</th><th>Телефон</th><th>Действия</th></tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="6" style="text-align:center;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Модальное окно редактирования (скрыто) -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Редактировать пользователя</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div id="modalMessage"></div>
+                <form id="editForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="form-group"><label>Имя *</label><input type="text" id="editName" class="form-control" required></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="editEmail" class="form-control" required></div>
+                    <div class="form-group"><label>Телефон</label><input type="tel" id="editPhone" class="form-control"></div>
+                    <div class="form-group"><label>О себе</label><textarea id="editBio" class="form-control" rows="3"></textarea></div>
+                    <button type="submit" class="btn" style="width:100%;">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>СТРОЙМАРКЕТЫ</h3>
+                    <p>Всё для строительства и ремонта. Профессиональные материалы, инструменты и оборудование от ведущих производителей.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Строителей, 15</li>
+                        <li><i class="fas fa-phone"></i> +7 (495) 123-45-67</li>
+                        <li><i class="fas fa-envelope"></i> info@stroymarkety.ru</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Главная</a></li>
+                        <li><a href="index.html#competencies">Компетенции</a></li>
+                        <li><a href="index.html#slider">Проекты</a></li>
+                        <li><a href="index.html#form">Контакты</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 СТРОЙМАРКЕТЫ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
