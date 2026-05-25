@@ -50,8 +50,6 @@ if (strpos($contentType, 'application/json') !== false) {
     }
 }
 
-// --- Отладка (можно закомментировать после проверки) ---
-// file_put_contents(__DIR__ . '/debug.log', "$method $requestUri\n", FILE_APPEND);
 
 // --- Маршрутизация ---
 try {
@@ -89,7 +87,7 @@ try {
             break;
 
         // Авторизация
-        case ($method === 'POST' && $requestUri === '/login'):
+        case ($method === 'POST' && $requestUri === '/FullStack_WebProject/api/login'):
             $login = $inputData['login'] ?? '';
             $password = $inputData['password'] ?? '';
             $user = authenticateUser($login, $password);
@@ -131,7 +129,7 @@ try {
             break;
 
         // Проверка авторизации
-        case ($method === 'GET' && $requestUri === '/check-auth'):
+        case ($method === 'GET' && $requestUri === '/FullStack_WebProject/api/check-auth'):
             if (isLoggedIn()) {
                 echo json_encode(['status' => 'success', 'user_id' => $_SESSION['user_id'], 'login' => $_SESSION['user_login']]);
             } else {
