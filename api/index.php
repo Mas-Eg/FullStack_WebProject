@@ -147,76 +147,38 @@ try {
     echo json_encode(['status' => 'error', 'message' => 'Внутренняя ошибка сервера']);
 }
 
-// ========== Административные маршруты ==========
+// Вход администратора
 case ($method === 'POST' && $requestUri === '/admin/login'):
     $login = $inputData['login'] ?? '';
     $password = $inputData['password'] ?? '';
-    if (authenticateAdmin($login, $password)) {
-        echo json_encode(['status' => 'success', 'message' => 'Admin logged in']);
+    if (adminAuthenticate($login, $password)) {
+        echo json_encode(['status' => 'success', 'message' => 'Вход выполнен']);
     } else {
         http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Invalid credentials']);
+        echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
     }
     break;
 
-case ($method === 'GET' && $requestUri === '/admin/check'):
-    if (isAdminLoggedIn()) {
-        echo json_encode(['status' => 'success', 'admin' => ['login' => ADMIN_LOGIN]]);
-    } else {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Not logged in']);
-    }
-    break;
-
-case ($method === 'POST' && $requestUri === '/admin/logout'):
-    requireAdmin();
-    adminLogout();
-    echo json_encode(['status' => 'success']);
-    break;
-
+// Получение списка всех пользователей (только админ)
 case ($method === 'GET' && $requestUri === '/admin/users'):
     requireAdmin();
-    $users = getAllUsersForAdmin();
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
+    $users = $stmt->fetchAll();
     echo json_encode(['status' => 'success', 'users' => $users]);
     break;
 
-case ($method === 'GET' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
-    requireAdmin();
-    $userId = (int)$m[1];
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT id, login, name, email, phone, bio FROM user_project WHERE id = ?");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
-    if ($user) {
-        echo json_encode(['status' => 'success', 'user' => $user]);
-    } else {
-        http_response_code(404);
-        echo json_encode(['status' => 'error', 'message' => 'User not found']);
-    }
-    break;
-
-case ($method === 'PUT' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
-    requireAdmin();
-    $userId = (int)$m[1];
-    $errors = validateFormData($inputData);
-    if (!empty($errors)) {
-        http_response_code(422);
-        echo json_encode(['status' => 'error', 'errors' => $errors]);
-        break;
-    }
-    adminUpdateAnyUser($userId, $inputData);
-    adminLogAction('EDIT_USER', "User ID $userId updated by admin");
-    echo json_encode(['status' => 'success', 'message' => 'User updated']);
-    break;
-
+// Удаление пользователя (только админ)
 case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
     requireAdmin();
     $userId = (int)$m[1];
-    if (adminDeleteUser($userId)) {
-        adminLogAction('DELETE_USER', "User ID $userId deleted by admin");
-        echo json_encode(['status' => 'success', 'message' => 'User deleted']);
+    $pdo = getDB();
+    $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
+    $stmt->execute([$userId]);
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Пользователь удалён']);
     } else {
         http_response_code(404);
-        echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
     }
     break;
