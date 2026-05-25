@@ -617,4 +617,41 @@
 #logoutAdminBtn:hover {
     background-color: #5a6268;
 }
+                    tr.editing td {
+    vertical-align: middle;
+}
+.edit-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+}
+.btn-edit, .btn-save, .btn-cancel {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 13px;
+    transition: background-color 0.3s;
+}
+.btn-edit:hover, .btn-save:hover {
+    background-color: #0056b3;
+}
+.btn-cancel {
+    background-color: #6c757d;
+}
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+.btn-danger {
+    background-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
         }
