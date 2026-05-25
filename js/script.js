@@ -412,9 +412,7 @@ if (document.getElementById('adminLoginForm')) {
     const adminPanelMessage = document.getElementById('adminPanelMessage');
     const usersTableBody = document.getElementById('usersTableBody');
     const logoutAdminBtn = document.getElementById('logoutAdminBtn');
-    const API_BASE = window.location.pathname.includes('/Web_Labs/FullStack_WebProject/') 
-        ? '/Web_Labs/FullStack_WebProject/api' 
-        : '/api';  // подстройка под ваш путь
+
 
     // Проверка, залогинен ли админ (при загрузке страницы)
     async function checkAdminAuth() {
