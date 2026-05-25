@@ -179,7 +179,7 @@ function showMessage(element, text, isError = false) {
 }
 
 // ================== Регистрация (index.html) ==================
-const API_BASE = '/Web_Labs/FullStack_WebProject/api';
+const API_BASE = '/Web_Labs/FullStack_WebProject';
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
@@ -223,7 +223,7 @@ if (contactForm) {
         showFieldErrors(null); // очищаем ошибки
 
         try {
-            const response = await fetch(API_BASE+'/', {
+            const response = await fetch(API_BASE+'/api', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
