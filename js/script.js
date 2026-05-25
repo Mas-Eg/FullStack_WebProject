@@ -179,8 +179,7 @@ function showMessage(element, text, isError = false) {
 }
 
 // ================== Регистрация (index.html) ==================
-//const API_BASE = '/Web_Labs/FullStack_WebProject';
-const API_BASE = '';
+const API_BASE = '/Web_Labs/FullStack_WebProject';
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
