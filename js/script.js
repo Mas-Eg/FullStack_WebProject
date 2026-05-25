@@ -403,205 +403,145 @@ if (loginForm) {
     checkAuth();
 }
 
-// ========== Админ-панель (упрощённая версия со статическим HTML) ==========
-// Автоопределение базового пути API
-if (typeof API_BASE === 'undefined') {
-    var API_BASE = '';
-}
+// ================== Админ-панель ==================
+if (document.getElementById('adminLoginForm')) {
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const adminLoginBlock = document.getElementById('adminLoginBlock');
+    const adminPanel = document.getElementById('adminPanel');
+    const adminLoginMessage = document.getElementById('adminLoginMessage');
+    const adminPanelMessage = document.getElementById('adminPanelMessage');
+    const usersTableBody = document.getElementById('usersTableBody');
+    const logoutAdminBtn = document.getElementById('logoutAdminBtn');
+    const API_BASE = window.location.pathname.includes('/Web_Labs/FullStack_WebProject/') 
+        ? '/Web_Labs/FullStack_WebProject/api' 
+        : '/api';  // подстройка под ваш путь
 
-// Вспомогательные функции
-function adminShowMessage(containerId, text, isError = false) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = `<div class="form-message ${isError ? 'error' : 'success'}" style="display:block;">${text}</div>`;
-    setTimeout(() => {
-        if (container.firstChild) container.firstChild.style.display = 'none';
-    }, 4000);
-}
-
-async function adminApiRequest(url, options = {}) {
-    const response = await fetch(API_BASE + url, {
-        ...options,
-        headers: { 'Content-Type': 'application/json', ...options.headers }
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Ошибка запроса');
-    return data;
-}
-
-async function adminCheckAuth() {
-    try {
-        await adminApiRequest('/api/admin/check');
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-async function adminLogin(login, password) {
-    return await adminApiRequest('/api/admin/login', {
-        method: 'POST',
-        body: JSON.stringify({ login, password })
-    });
-}
-
-async function adminLogout() {
-    await adminApiRequest('/api/admin/logout', { method: 'POST' });
-}
-
-async function adminLoadUsers() {
-    const data = await adminApiRequest('/api/admin/users');
-    return data.users;
-}
-
-async function adminDeleteUser(userId) {
-    return await adminApiRequest(`/api/admin/users/${userId}`, { method: 'DELETE' });
-}
-
-async function adminUpdateUser(userId, userData) {
-    return await adminApiRequest(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        body: JSON.stringify(userData)
-    });
-}
-
-// Заполнение таблицы пользователей
-async function renderUserTable() {
-    const tbody = document.getElementById('userTableBody');
-    if (!tbody) return;
-    try {
-        const users = await adminLoadUsers();
-        tbody.innerHTML = '';
-        if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Пользователей не найдено</td></tr>';
-            return;
-        }
-        users.forEach(user => {
-            const row = tbody.insertRow();
-            row.insertCell(0).textContent = user.id;
-            row.insertCell(1).textContent = user.login;
-            row.insertCell(2).textContent = user.name;
-            row.insertCell(3).textContent = user.email;
-            row.insertCell(4).textContent = user.phone || '—';
-            const actionsCell = row.insertCell(5);
-            const editBtn = document.createElement('button');
-            editBtn.textContent = 'Редактировать';
-            editBtn.className = 'btn btn-sm btn-edit';
-            editBtn.onclick = () => openEditModal(user);
-            const delBtn = document.createElement('button');
-            delBtn.textContent = 'Удалить';
-            delBtn.className = 'btn btn-sm btn-delete';
-            delBtn.onclick = async () => {
-                if (confirm(`Удалить пользователя ${user.login}?`)) {
-                    try {
-                        await adminDeleteUser(user.id);
-                        adminShowMessage('adminMessage', 'Пользователь удалён', false);
-                        renderUserTable();
-                    } catch (err) {
-                        adminShowMessage('adminMessage', err.message, true);
-                    }
-                }
-            };
-            actionsCell.appendChild(editBtn);
-            actionsCell.appendChild(delBtn);
-        });
-    } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Ошибка загрузки: ${err.message}</td></tr>`;
-    }
-}
-
-// Модальное окно
-function openEditModal(user) {
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('editName').value = user.name;
-    document.getElementById('editEmail').value = user.email;
-    document.getElementById('editPhone').value = user.phone || '';
-    document.getElementById('editBio').value = user.bio || '';
-    document.getElementById('editModal').style.display = 'flex';
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-
-// Навешивание событий после загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
-    // Элементы блоков
-    const loginBlock = document.getElementById('adminLoginBlock');
-    const panelBlock = document.getElementById('adminPanelBlock');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loginForm = document.getElementById('adminLoginForm');
-    const modal = document.getElementById('editModal');
-    const closeModal = modal?.querySelector('.close-modal');
-    const editForm = document.getElementById('editForm');
-
-    // Закрытие модального окна
-    if (closeModal) closeModal.onclick = closeEditModal;
-    window.onclick = (e) => { if (e.target === modal) closeEditModal(); };
-
-    // Обработчик выхода
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            await adminLogout();
-            loginBlock.style.display = 'block';
-            panelBlock.style.display = 'none';
-            adminShowMessage('loginMessage', 'Вы вышли из системы', false);
-        });
-    }
-
-    // Обработчик входа
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const login = document.getElementById('adminLogin').value;
-            const password = document.getElementById('adminPassword').value;
-            try {
-                await adminLogin(login, password);
-                adminShowMessage('loginMessage', 'Вход выполнен', false);
-                // Переключаем блоки
-                loginBlock.style.display = 'none';
-                panelBlock.style.display = 'block';
-                await renderUserTable();
-            } catch (err) {
-                adminShowMessage('loginMessage', err.message, true);
+    // Проверка, залогинен ли админ (при загрузке страницы)
+    async function checkAdminAuth() {
+        try {
+            const resp = await fetch(`${API_BASE}/admin/users`);
+            if (resp.ok) {
+                // админ авторизован
+                adminLoginBlock.style.display = 'none';
+                adminPanel.style.display = 'block';
+                loadUsers();
+            } else {
+                adminLoginBlock.style.display = 'block';
+                adminPanel.style.display = 'none';
             }
-        });
-    }
-
-    // Обработчик редактирования
-    if (editForm) {
-        editForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const userId = document.getElementById('editUserId').value;
-            const data = {
-                name: document.getElementById('editName').value,
-                email: document.getElementById('editEmail').value,
-                phone: document.getElementById('editPhone').value,
-                bio: document.getElementById('editBio').value
-            };
-            try {
-                await adminUpdateUser(userId, data);
-                adminShowMessage('modalMessage', 'Данные обновлены', false);
-                setTimeout(() => {
-                    closeEditModal();
-                    renderUserTable();
-                }, 1000);
-            } catch (err) {
-                adminShowMessage('modalMessage', err.message, true);
-            }
-        });
-    }
-
-    // Проверка авторизации при загрузке
-    (async () => {
-        const isAdmin = await adminCheckAuth();
-        if (isAdmin) {
-            loginBlock.style.display = 'none';
-            panelBlock.style.display = 'block';
-            await renderUserTable();
-        } else {
-            loginBlock.style.display = 'block';
-            panelBlock.style.display = 'none';
+        } catch (e) {
+            adminLoginBlock.style.display = 'block';
+            adminPanel.style.display = 'none';
         }
-    })();
-});
+    }
+
+    // Загрузка списка пользователей
+    async function loadUsers() {
+        try {
+            const resp = await fetch(`${API_BASE}/admin/users`);
+            const data = await resp.json();
+            if (data.status === 'success') {
+                usersTableBody.innerHTML = '';
+                data.users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${escapeHtml(user.login)}</td>
+                        <td>${escapeHtml(user.name)}</td>
+                        <td>${escapeHtml(user.email)}</td>
+                        <td>${escapeHtml(user.phone || '')}</td>
+                        <td>${user.created_at}</td>
+                        <td>
+                            <button class="btn-danger delete-user" data-id="${user.id}">Удалить</button>
+                        </td>
+                    `;
+                    usersTableBody.appendChild(row);
+                });
+
+                // Навешиваем обработчики удаления
+                document.querySelectorAll('.delete-user').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const userId = this.dataset.id;
+                        if (confirm('Удалить пользователя?')) {
+                            try {
+                                const delResp = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                                    method: 'DELETE'
+                                });
+                                const delData = await delResp.json();
+                                if (delResp.ok && delData.status === 'success') {
+                                    showMessage(adminPanelMessage, 'Пользователь удалён', false);
+                                    loadUsers(); // обновить таблицу
+                                } else {
+                                    showMessage(adminPanelMessage, delData.message || 'Ошибка удаления', true);
+                                }
+                            } catch (err) {
+                                showMessage(adminPanelMessage, 'Сетевая ошибка', true);
+                            }
+                        }
+                    });
+                });
+            } else {
+                // если ошибка, возможно сессия истекла
+                adminLoginBlock.style.display = 'block';
+                adminPanel.style.display = 'none';
+            }
+        } catch (e) {
+            showMessage(adminPanelMessage, 'Ошибка загрузки пользователей', true);
+        }
+    }
+
+    // Вход админа
+    adminLoginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const login = document.getElementById('adminLogin').value;
+        const password = document.getElementById('adminPassword').value;
+
+        try {
+            const resp = await fetch(`${API_BASE}/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+            const data = await resp.json();
+            if (resp.ok && data.status === 'success') {
+                adminLoginBlock.style.display = 'none';
+                adminPanel.style.display = 'block';
+                loadUsers();
+            } else {
+                showMessage(adminLoginMessage, data.message || 'Ошибка входа', true);
+            }
+        } catch (e) {
+            showMessage(adminLoginMessage, 'Сетевая ошибка', true);
+        }
+    });
+
+    // Выход
+    logoutAdminBtn.addEventListener('click', async function() {
+        // Удаляем сессию админа на сервере (можно сделать отдельный метод logout)
+        // Простейший способ: вызвать любой URL, который сбросит сессию, или просто перезагрузить страницу
+        // Добавим метод GET /api/admin/logout в api/index.php? Но для простоты просто перезагрузим
+        // Чтобы сбросить сессию, можно сделать запрос на несуществующий маршрут или специальный logout
+        // Реализуем быстрый logout через api
+        try {
+            await fetch(`${API_BASE}/admin/logout`, { method: 'GET' });
+        } catch(e) {}
+        adminLoginBlock.style.display = 'block';
+        adminPanel.style.display = 'none';
+        adminLoginForm.reset();
+    });
+
+    // Экранирование HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Инициализация
+    checkAdminAuth();
+}
