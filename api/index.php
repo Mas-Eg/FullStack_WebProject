@@ -137,7 +137,7 @@ try {
 
         // ========== Администратор ==========
         // Вход администратора
-        case ($method === 'POST' && $requestUri === '/admin/login'):
+        case ($method === 'POST' && $requestUri === '/api/admin/login'):
             $login = $inputData['login'] ?? '';
             $password = $inputData['password'] ?? '';
             if (adminAuthenticate($login, $password)) {
@@ -149,7 +149,7 @@ try {
             break;
 
         // Получение списка всех пользователей (только админ)
-        case ($method === 'GET' && $requestUri === '/admin/users'):
+        case ($method === 'GET' && $requestUri === '/api/admin/users'):
             requireAdmin();
             $pdo = getDB();
             $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
@@ -173,7 +173,7 @@ try {
             break;
 
         // Выход администратора
-        case ($method === 'GET' && $requestUri === '/admin/logout'):
+        case ($method === 'GET' && $requestUri === '/api/admin/logout'):
             unset($_SESSION['is_admin']);
             session_destroy();
             echo json_encode(['status' => 'success', 'message' => 'Выход выполнен']);
