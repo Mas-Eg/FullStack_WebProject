@@ -419,7 +419,7 @@ if (document.getElementById('adminLoginForm')) {
     // Проверка, залогинен ли админ (при загрузке страницы)
     async function checkAdminAuth() {
         try {
-            const resp = await fetch(`${API_BASE}/admin/users`);
+            const resp = await fetch(`${API_BASE}/api/admin/users`);
             if (resp.ok) {
                 // админ авторизован
                 adminLoginBlock.style.display = 'none';
@@ -438,7 +438,7 @@ if (document.getElementById('adminLoginForm')) {
     // Загрузка списка пользователей
     async function loadUsers() {
         try {
-            const resp = await fetch(`${API_BASE}/admin/users`);
+            const resp = await fetch(`${API_BASE}/api/admin/users`);
             const data = await resp.json();
             if (data.status === 'success') {
                 usersTableBody.innerHTML = '';
@@ -464,7 +464,7 @@ if (document.getElementById('adminLoginForm')) {
                         const userId = this.dataset.id;
                         if (confirm('Удалить пользователя?')) {
                             try {
-                                const delResp = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                                const delResp = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
                                     method: 'DELETE'
                                 });
                                 const delData = await delResp.json();
@@ -523,7 +523,7 @@ if (document.getElementById('adminLoginForm')) {
         // Чтобы сбросить сессию, можно сделать запрос на несуществующий маршрут или специальный logout
         // Реализуем быстрый logout через api
         try {
-            await fetch(`${API_BASE}/admin/logout`, { method: 'GET' });
+            await fetch(`${API_BASE}/api/admin/logout`, { method: 'GET' });
         } catch(e) {}
         adminLoginBlock.style.display = 'block';
         adminPanel.style.display = 'none';
