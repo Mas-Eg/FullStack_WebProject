@@ -1,26 +1,25 @@
 <?php
 require_once 'functions.php';
 
-// Включаем отображение ошибок (для отладки, потом можно убрать)
+// Показываем ошибки (только для отладки, потом можно убрать)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
-// --- Определяем $method в самом начале ---
+// Определяем $method в самом начале
 $method = $_SERVER['REQUEST_METHOD'];
 
-// --- Вычисляем маршрут ---
-$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');   // например: /FullStack_WebProject/api
+// Вычисляем базовый путь и URI
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
 if (strpos($requestUri, $basePath) === 0) {
     $requestUri = substr($requestUri, strlen($basePath));
 }
 $requestUri = rtrim($requestUri, '/') ?: '/';
 
-// --- Получаем тело запроса ---
+// Получаем тело запроса
 $rawBody = file_get_contents('php://input');
 $inputData = [];
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -28,7 +27,6 @@ $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 if (strpos($contentType, 'application/json') !== false) {
     $inputData = json_decode($rawBody, true);
 } elseif (strpos($contentType, 'application/xml') !== false) {
-    // Проверяем наличие SimpleXML
     if (!function_exists('simplexml_load_string')) {
         http_response_code(501);
         echo json_encode(['status' => 'error', 'message' => 'XML не поддерживается сервером']);
@@ -50,8 +48,7 @@ if (strpos($contentType, 'application/json') !== false) {
     }
 }
 
-
-// --- Маршрутизация ---
+// Маршрутизация
 try {
     switch (true) {
         // Регистрация нового пользователя
@@ -107,7 +104,7 @@ try {
             }
             break;
 
-        // Получение данных пользователя (для формы редактирования)
+        // Получение данных пользователя
         case ($method === 'GET' && preg_match('#^/(\d+)$#', $requestUri, $m)):
             $userId = (int)$m[1];
             requireAuth();
@@ -138,6 +135,50 @@ try {
             }
             break;
 
+        // ========== Администратор ==========
+        // Вход администратора
+        case ($method === 'POST' && $requestUri === '/admin/login'):
+            $login = $inputData['login'] ?? '';
+            $password = $inputData['password'] ?? '';
+            if (adminAuthenticate($login, $password)) {
+                echo json_encode(['status' => 'success', 'message' => 'Вход выполнен']);
+            } else {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
+            }
+            break;
+
+        // Получение списка всех пользователей (только админ)
+        case ($method === 'GET' && $requestUri === '/admin/users'):
+            requireAdmin();
+            $pdo = getDB();
+            $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
+            $users = $stmt->fetchAll();
+            echo json_encode(['status' => 'success', 'users' => $users]);
+            break;
+
+        // Удаление пользователя (только админ)
+        case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
+            requireAdmin();
+            $userId = (int)$m[1];
+            $pdo = getDB();
+            $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
+            $stmt->execute([$userId]);
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Пользователь удалён']);
+            } else {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
+            }
+            break;
+
+        // Выход администратора
+        case ($method === 'GET' && $requestUri === '/admin/logout'):
+            unset($_SESSION['is_admin']);
+            session_destroy();
+            echo json_encode(['status' => 'success', 'message' => 'Выход выполнен']);
+            break;
+
         default:
             http_response_code(404);
             echo json_encode(['status' => 'error', 'message' => 'Маршрут не найден']);
@@ -146,47 +187,3 @@ try {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Внутренняя ошибка сервера']);
 }
-
-// --- Административные маршруты ---
-case ($method === 'POST' && $requestUri === '/admin/login'):
-    $login = $inputData['login'] ?? '';
-    $password = $inputData['password'] ?? '';
-    if (adminAuthenticate($login, $password)) {
-        echo json_encode(['status' => 'success', 'message' => 'Вход выполнен']);
-    } else {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
-    }
-    break;
-
-case ($method === 'GET' && $requestUri === '/admin/users'):
-    requireAdmin();
-    $pdo = getDB();
-    $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
-    $users = $stmt->fetchAll();
-    echo json_encode(['status' => 'success', 'users' => $users]);
-    break;
-
-case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
-    requireAdmin();
-    $userId = (int)$m[1];
-    $pdo = getDB();
-    $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
-    $stmt->execute([$userId]);
-    if ($stmt->rowCount() > 0) {
-        echo json_encode(['status' => 'success', 'message' => 'Пользователь удалён']);
-    } else {
-        http_response_code(404);
-        echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
-    }
-    break;
-
-case ($method === 'GET' && $requestUri === '/admin/logout'):
-    session_destroy();
-    echo json_encode(['status' => 'success', 'message' => 'Вы вышли']);
-    break;
-
-default:
-    http_response_code(404);
-    echo json_encode(['status' => 'error', 'message' => 'Маршрут не найден']);
-    break;
