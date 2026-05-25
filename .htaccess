@@ -1,8 +1,4 @@
 RewriteEngine On
-RewriteBase /Web_Labs/FullStack_WebProject/
 
-# Если запрос не ведёт к реальному файлу или папке
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-RewriteRule ^(.*)$ router.php [QSA,L]
+# Все запросы, начинающиеся с /api, сразу передаём в api/index.php
+RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
