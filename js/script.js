@@ -285,7 +285,7 @@ async function checkAuth() {
 
 async function loadUserProfile(userId) {
     try {
-        const resp = await fetch(API_BASE+'/{userId}`, {
+        const resp = await fetch(API_BASE+'/{userId}', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
