@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Загрузка списка пользователей
     async function loadUsers() {
         try {
-            const resp = await fetch(`${API_BASE}/api/admin/users`);
+            const resp = await fetch(`${API_BASE}/admin/users`);
             const data = await resp.json();
             if (data.status === 'success') {
                 usersTableBody.innerHTML = '';
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('adminPassword').value;
 
         try {
-            const resp = await fetch(`${API_BASE}/api/admin/login`, {
+            const resp = await fetch(`${API_BASE}/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password })
