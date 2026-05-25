@@ -1,7 +1,7 @@
 <?php
 require_once 'api/functions.php';
 
-// Если AJAX-запрос (не должен сюда попасть, но на всякий случай)
+// Если AJAX-запрос 
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
     header('Content-Type: application/json');
     require 'api/index.php';
@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Дополнительные стили для страницы результата */
         .page-wrapper {
             min-height: 100vh;
             display: flex;
@@ -60,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="page-wrapper">
-        <!-- Шапка как на главной, но без видео-фона -->
         <header>
             <nav class="nav">
                 <a href="index.html" class="logo">СТРОЙ<span>МАРКЕТЫ</span></a>
@@ -74,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </nav>
         </header>
 
-        <!-- Основной контент -->
         <main class="content-area">
             <div class="result-container">
                 <div class="form-container" style="margin: 0; box-shadow: 0 5px 30px rgba(0,0,0,0.1);">
