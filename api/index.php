@@ -173,7 +173,19 @@ try {
                 echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
             }
             break;
-
+// Обновление данных пользователя администратором
+case ($method === 'PUT' && preg_match('#^/admin/users/(\d+)/?$#', $requestUri, $m)):
+    requireAdmin();
+    $userId = (int)$m[1];
+    $errors = validateFormData($inputData);
+    if (!empty($errors)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'errors' => $errors]);
+        break;
+    }
+    $result = adminUpdateUser($userId, $inputData);
+    echo json_encode($result);
+    break;
         // Выход администратора
         case ($method === 'GET' && in_array($requestUri, ['/admin/logout', '/admin/logout/'])):
             unset($_SESSION['is_admin']);
