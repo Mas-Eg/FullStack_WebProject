@@ -270,7 +270,7 @@ const pageTitle = document.getElementById('pageTitle');
 // Проверка авторизации при загрузке login.html
 async function checkAuth() {
     try {
-        const resp = await fetch('${API_BASE}/check-auth', {
+        const resp = await fetch('${API_BASE}/api', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
