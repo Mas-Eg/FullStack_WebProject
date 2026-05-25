@@ -19,11 +19,13 @@ if (strpos($requestUri, $basePath) === 0) {
 }
 $requestUri = rtrim($requestUri, '/') ?: '/';
 
+file_put_contents(__DIR__ . '/debug.log', date('H:i:s') . " $method $requestUri\n", FILE_APPEND);
+
+
 // Получаем тело запроса
 $rawBody = file_get_contents('php://input');
 $inputData = [];
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-
 if (strpos($contentType, 'application/json') !== false) {
     $inputData = json_decode($rawBody, true);
 } elseif (strpos($contentType, 'application/xml') !== false) {
