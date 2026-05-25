@@ -179,7 +179,8 @@ function showMessage(element, text, isError = false) {
 }
 
 // ================== Регистрация (index.html) ==================
-const API_BASE = '/Web_Labs/FullStack_WebProject';
+//const API_BASE = '/Web_Labs/FullStack_WebProject';
+const API_BASE = '';
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
@@ -285,7 +286,7 @@ async function checkAuth() {
 
 async function loadUserProfile(userId) {
     try {
-        const resp = await fetch(`${API_BASE}/${userId}`, {
+        const resp = await fetch(`${API_BASE}/api/${userId}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (resp.ok) {
@@ -317,7 +318,7 @@ if (loginForm) {
         const credentials = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch(API_BASE+'/login', {
+            const response = await fetch(`${API_BASE}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -376,7 +377,7 @@ if (loginForm) {
         showFieldErrors(null);
 
         try {
-            const response = await fetch(API_BASE+'/${userId}', {
+            const response = await fetch(`${API_BASE}/api/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
