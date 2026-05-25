@@ -136,54 +136,45 @@ try {
             break;
 
         // ========== Администратор ==========
-        // Вход администратора
-        case ($method === 'POST' && $requestUri === '/admin/login'):
-            $login = $inputData['login'] ?? '';
-            $password = $inputData['password'] ?? '';
-            if (adminAuthenticate($login, $password)) {
-                echo json_encode(['status' => 'success', 'message' => 'Вход выполнен']);
-            } else {
-                http_response_code(401);
-                echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
-            }
-            break;
-
-        // Получение списка всех пользователей (только админ)
-        case ($method === 'GET' && $requestUri === '/admin/users'):
-            requireAdmin();
-            $pdo = getDB();
-            $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
-            $users = $stmt->fetchAll();
-            echo json_encode(['status' => 'success', 'users' => $users]);
-            break;
-
-        // Удаление пользователя (только админ)
-        case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
-            requireAdmin();
-            $userId = (int)$m[1];
-            $pdo = getDB();
-            $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
-            $stmt->execute([$userId]);
-            if ($stmt->rowCount() > 0) {
-                echo json_encode(['status' => 'success', 'message' => 'Пользователь удалён']);
-            } else {
-                http_response_code(404);
-                echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
-            }
-            break;
-
-        // Выход администратора
-        case ($method === 'GET' && $requestUri === '/admin/logout'):
-            unset($_SESSION['is_admin']);
-            session_destroy();
-            echo json_encode(['status' => 'success', 'message' => 'Выход выполнен']);
-            break;
-
-        default:
-            http_response_code(404);
-            echo json_encode(['status' => 'error', 'message' => 'Маршрут не найден']);
+// Вход администратора
+case ($method === 'POST' && in_array($requestUri, ['/admin/login', '/admin/login/'])):
+    $login = $inputData['login'] ?? '';
+    $password = $inputData['password'] ?? '';
+    if (adminAuthenticate($login, $password)) {
+        echo json_encode(['status' => 'success', 'message' => 'Вход выполнен']);
+    } else {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Неверный логин или пароль']);
     }
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Внутренняя ошибка сервера']);
-}
+    break;
+
+// Получение списка всех пользователей (только админ)
+case ($method === 'GET' && in_array($requestUri, ['/admin/users', '/admin/users/'])):
+    requireAdmin();
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT id, login, name, email, phone, bio, created_at FROM user_project ORDER BY id DESC");
+    $users = $stmt->fetchAll();
+    echo json_encode(['status' => 'success', 'users' => $users]);
+    break;
+
+// Удаление пользователя (только админ)
+case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)/?$#', $requestUri, $m)):
+    requireAdmin();
+    $userId = (int)$m[1];
+    $pdo = getDB();
+    $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
+    $stmt->execute([$userId]);
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Пользователь удалён']);
+    } else {
+        http_response_code(404);
+        echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
+    }
+    break;
+
+// Выход администратора
+case ($method === 'GET' && in_array($requestUri, ['/admin/logout', '/admin/logout/'])):
+    unset($_SESSION['is_admin']);
+    session_destroy();
+    echo json_encode(['status' => 'success', 'message' => 'Выход выполнен']);
+    break;
