@@ -4,5 +4,5 @@ RewriteBase /Web_Labs/FullStack_WebProject/
 # Если запрос не ведёт к реальному файлу или папке
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-# Перенаправляем все запросы на router.php
+
 RewriteRule ^(.*)$ router.php [QSA,L]
