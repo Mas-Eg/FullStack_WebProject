@@ -93,7 +93,19 @@ function adminAuthenticate($login, $password) {
     }
     return false;
 }
-
+function adminUpdateUser($userId, $data) {
+    $pdo = getDB();
+    $sql = "UPDATE user_project SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        $data['name'],
+        $data['email'],
+        $data['phone'] ?? '',
+        $data['bio'] ?? '',
+        $userId
+    ]);
+    return ['status' => 'success', 'message' => 'Данные пользователя обновлены'];
+}
 function requireAdmin() {
     if (!isAdmin()) {
         http_response_code(401);
