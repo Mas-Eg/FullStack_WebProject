@@ -239,7 +239,7 @@ if (contactForm) {
                     <p>Регистрация успешна!</p>
                     <p>Логин: <strong>${result.login}</strong></p>
                     <p>Пароль: <strong>${result.password}</strong></p>
-                    <p>Ссылка на профиль: <a href="/Web_Labs/FullStack_WebProject/login.html?id=${result.id}">/Web_Labs/FullStack_WebProject/login.html?id=${result.id}</a></p>
+                    <p>Ссылка на профиль: <a href="/Web_Labs/FullStack_WebProject/login.html">/Web_Labs/FullStack_WebProject/login.html</a></p>
                 `;
                 formMessage.innerHTML = msgHtml;
                 formMessage.className = 'form-message success';
