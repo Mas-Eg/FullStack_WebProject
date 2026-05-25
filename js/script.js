@@ -179,7 +179,15 @@ function showMessage(element, text, isError = false) {
 }
 
 // ================== Регистрация (index.html) ==================
-const API_BASE = '/Web_Labs/FullStack_WebProject';
+//const API_BASE = '/Web_Labs/FullStack_WebProject';
+const API_BASE = (() => {
+    const path = window.location.pathname;
+    // Если мы в подпапке типа /FullStack_WebProject, берём её как базу
+    const match = path.match(/^(\/.*?\/FullStack_WebProject)/);
+    if (match) return match[1];
+    // Иначе возвращаем пустую строку (относительные запросы)
+    return '';
+})();
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
