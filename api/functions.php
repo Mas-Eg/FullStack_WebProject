@@ -93,7 +93,7 @@ function isAdmin() {
 
 function adminAuthenticate($login, $password) {
     $adminLogin = 'admin';
-    $adminPasswordHash = '2yn.4fvaTgedM';// Хеш пароля "admin"
+    $adminPasswordHash = '$2y$10$66B0lHx5jZvUn1HAme1X1.oBcisqtWixA3kO.oETq7RwiteAouyqS';// Хеш пароля "admin"
     
     if ($login === $adminLogin && password_verify($password, $adminPasswordHash)) {
         $_SESSION['is_admin'] = true;
