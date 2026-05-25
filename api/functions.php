@@ -4,33 +4,24 @@ require_once 'db.php';
 
 function generateLoginPassword() {
     $login = 'u' . bin2hex(random_bytes(3));   
-    $password = bin2hex(random_bytes(4));      
+    $password = bin2hex(random_bytes(4));     
     return [$login, $password];
 }
 
 function validateFormData($data) {
     $errors = [];
-    
-    // Проверка имени (минимум 2 символа Unicode)
     if (empty($data['name']) || !preg_match('/^.{2,}$/u', $data['name'])) {
         $errors['name'] = 'Имя должно содержать минимум 2 символа';
     }
-    
-    // Проверка email
     if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Некорректный email';
     }
-    
-    // Проверка телефона (если указан)
     if (!empty($data['phone']) && !preg_match('/^\+?\d{7,15}$/', $data['phone'])) {
         $errors['phone'] = 'Некорректный номер телефона';
     }
-    
-    // Проверка сообщения (не более 500 символов Unicode)
     if (!empty($data['bio']) && !preg_match('/^.{0,500}$/u', $data['bio'])) {
         $errors['bio'] = 'Сообщение не должно превышать 500 символов';
     }
-    
     return $errors;
 }
 
@@ -42,13 +33,16 @@ function saveUser($data) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$login, $hashedPassword, $data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '']);
     $userId = $pdo->lastInsertId();
-    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-    $projectDir = rtrim($scriptDir, '/') == '/api' ? dirname($scriptDir) : $scriptDir;
+
+    // Формируем корректный URL профиля относительно корня проекта
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);        // например: /Web_Labs/FullStack_WebProject/api
+    $projectDir = str_replace('/api', '', $scriptDir);   // убираем "/api"
     $profile_url = $projectDir . '/login.html?id=' . $userId;
+
     return [
-        'user_id' => $userId,
-        'login' => $login,
-        'password' => $password,   
+        'user_id'   => $userId,
+        'login'     => $login,
+        'password'  => $password,   // передаётся открытым только при создании
         'profile_url' => $profile_url
     ];
 }
@@ -92,9 +86,9 @@ function isAdmin() {
 }
 
 function adminAuthenticate($login, $password) {
+    // Учётные данные администратора (логин: admin, пароль: admin123)
     $adminLogin = 'admin';
-    $adminPasswordHash = '$2y$10$66B0lHx5jZvUn1HAme1X1.oBcisqtWixA3kO.oETq7RwiteAouyqS';// Хеш пароля "admin"
-    
+    $adminPasswordHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
     if ($login === $adminLogin && password_verify($password, $adminPasswordHash)) {
         $_SESSION['is_admin'] = true;
         $_SESSION['admin_login'] = $login;
