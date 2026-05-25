@@ -87,7 +87,7 @@ try {
             break;
 
         // Авторизация
-        case ($method === 'POST' && $requestUri === '/FullStack_WebProject/login'):
+        case ($method === 'POST' && $requestUri === '/login'):
             $login = $inputData['login'] ?? '';
             $password = $inputData['password'] ?? '';
             $user = authenticateUser($login, $password);
@@ -129,7 +129,7 @@ try {
             break;
 
         // Проверка авторизации
-        case ($method === 'GET' && $requestUri === '/FullStack_WebProject/check-auth'):
+        case ($method === 'GET' && $requestUri === '/check-auth'):
             if (isLoggedIn()) {
                 echo json_encode(['status' => 'success', 'user_id' => $_SESSION['user_id'], 'login' => $_SESSION['user_login']]);
             } else {
