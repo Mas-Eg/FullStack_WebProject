@@ -376,7 +376,7 @@ if (loginForm) {
         showFieldErrors(null);
 
         try {
-            const response = await fetch(API_BASE+'/${userId}`, {
+            const response = await fetch(API_BASE+'/${userId}', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
