@@ -80,12 +80,12 @@ function requireAuth() {
     }
 }
 
-// ========== Администратор ==========
 function isAdmin() {
     return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 }
 
 function adminAuthenticate($login, $password) {
+    // Простейшая временная проверка (без password_hash)
     if ($login === 'admin' && $password === 'admin123') {
         $_SESSION['is_admin'] = true;
         $_SESSION['admin_login'] = $login;
@@ -101,3 +101,4 @@ function requireAdmin() {
         exit;
     }
 }
+?>
