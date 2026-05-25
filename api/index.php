@@ -147,7 +147,7 @@ try {
     echo json_encode(['status' => 'error', 'message' => 'Внутренняя ошибка сервера']);
 }
 
-// Вход администратора
+// --- Административные маршруты ---
 case ($method === 'POST' && $requestUri === '/admin/login'):
     $login = $inputData['login'] ?? '';
     $password = $inputData['password'] ?? '';
@@ -159,7 +159,6 @@ case ($method === 'POST' && $requestUri === '/admin/login'):
     }
     break;
 
-// Получение списка всех пользователей (только админ)
 case ($method === 'GET' && $requestUri === '/admin/users'):
     requireAdmin();
     $pdo = getDB();
@@ -168,7 +167,6 @@ case ($method === 'GET' && $requestUri === '/admin/users'):
     echo json_encode(['status' => 'success', 'users' => $users]);
     break;
 
-// Удаление пользователя (только админ)
 case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, $m)):
     requireAdmin();
     $userId = (int)$m[1];
@@ -181,4 +179,14 @@ case ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $requestUri, 
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Пользователь не найден']);
     }
+    break;
+
+case ($method === 'GET' && $requestUri === '/admin/logout'):
+    session_destroy();
+    echo json_encode(['status' => 'success', 'message' => 'Вы вышли']);
+    break;
+
+default:
+    http_response_code(404);
+    echo json_encode(['status' => 'error', 'message' => 'Маршрут не найден']);
     break;
