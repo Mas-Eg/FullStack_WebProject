@@ -85,3 +85,58 @@ function requireAuth() {
         exit;
     }
 }
+
+//админ панель
+// Хеш пароля для admin (пароль: admin123)
+define('ADMIN_PASSWORD_HASH', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+define('ADMIN_LOGIN', 'admin');
+
+function authenticateAdmin($login, $password) {
+    if ($login !== ADMIN_LOGIN) return false;
+    if (password_verify($password, ADMIN_PASSWORD_HASH)) {
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_login'] = ADMIN_LOGIN;
+        adminLogAction('LOGIN', 'Successful login');
+        return true;
+    }
+    return false;
+}
+
+function isAdminLoggedIn() {
+    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+}
+
+function requireAdmin() {
+    if (!isAdminLoggedIn()) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+        exit;
+    }
+}
+
+function adminLogout() {
+    adminLogAction('LOGOUT', 'Logged out');
+    unset($_SESSION['admin_logged_in'], $_SESSION['admin_login']);
+    session_regenerate_id(true);
+}
+
+function getAllUsersForAdmin() {
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT id, login, name, email, phone, bio FROM user_project ORDER BY id DESC");
+    return $stmt->fetchAll();
+}
+
+function adminUpdateAnyUser($userId, $data) {
+    $pdo = getDB();
+    $sql = "UPDATE user_project SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$data['name'], $data['email'], $data['phone'] ?? '', $data['bio'] ?? '', $userId]);
+    return true;
+}
+
+function adminDeleteUser($userId) {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("DELETE FROM user_project WHERE id = ?");
+    $stmt->execute([$userId]);
+    return $stmt->rowCount() > 0;
+}
