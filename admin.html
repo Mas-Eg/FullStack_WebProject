@@ -31,7 +31,7 @@
             <div id="adminLoginBlock">
                 <h2 class="form-title">Вход для администратора</h2>
                 <div class="form-message" id="adminLoginMessage"></div>
-                <form id="adminLoginForm" action="admin-process.php?action=login" method="POST">
+                <form id="adminLoginForm">
                     <div class="form-group">
                         <label for="adminLogin">Логин</label>
                         <input type="text" id="adminLogin" name="login" class="form-control" required>
@@ -102,8 +102,6 @@
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/script.js">
-        checkAdminAuth();
-    </script>
+    <script src="js/script_admin.js"></script>
 </body>
 </html>
