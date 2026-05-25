@@ -495,7 +495,7 @@ if (document.getElementById('adminLoginForm')) {
         const password = document.getElementById('adminPassword').value;
 
         try {
-            const resp = await fetch(`${API_BASE}/admin/login`, {
+            const resp = await fetch(`${API_BASE}/api/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password })
